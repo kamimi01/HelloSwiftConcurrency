@@ -42,9 +42,19 @@ func fetchThumnail(for id: String) async throws -> UIImage {
     let (data, response) = try await URLSession.shared.data(for: request)
     guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw FetchError.badID }
     let maybeImage = UIImage(data: data)
+    // プロパティやイニシャライザに対しても、非同期にすることができる（awaitをつけることができる）
     guard let thumbnail = await maybeImage?.thumbnail else { throw FetchError.badImage }
     return thumbnail
 }
 
-// 呼び出し元
+extension UIImage {
+    var thumbnail: UIImage? {
+        // 明示的なゲッターは、非同期にするために必要
+        // セッターがない場合、ゲッター専用プロパティのみ、非同期にすることができる
+        get async {
+            let size = CGSize(width: 40, height: 40)
+            return await self.byPreparingThumbnail(ofSize: size)
+        }
+    }
+}
 
