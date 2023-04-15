@@ -1,4 +1,5 @@
 import UIKit
+import XCTest
 
 enum FetchError: Error {
     case badImage
@@ -58,3 +59,12 @@ extension UIImage {
     }
 }
 
+// テスト
+class MockViewModelSpec: XCTestCase {
+    func testFetchThumbnails() async throws {
+        // テストでもasync/await を使うことで、XCTestExpectationを使わなくて良くなる
+        let expectation = XCTestExpectation(description: "mock thumbnails completion")
+        let result = try await fetchThumnail(for: "mockID")
+        XCTAssertEqual(result.size, CGSize(width: 40, height: 40))
+    }
+}
