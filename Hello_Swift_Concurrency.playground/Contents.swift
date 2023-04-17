@@ -1,6 +1,7 @@
 import UIKit
 import XCTest
 
+/// Meet async/await in Swift https://developer.apple.com/videos/play/wwdc2021/10132/
 enum FetchError: Error {
     case badImage
     case badID
@@ -67,4 +68,44 @@ class MockViewModelSpec: XCTestCase {
         let result = try await fetchThumnail(for: "mockID")
         XCTAssertEqual(result.size, CGSize(width: 40, height: 40))
     }
+}
+
+/// Use async/await with URLSession
+enum DogsError: Error {
+    case invalidServerResponse
+    case unsupportedImage
+}
+
+// 完了ハンドラーベースの関数
+func fetchPhoto(url: URL, completionHandler: @escaping (UIImage?, Error?) -> Void?) {
+    let task = URLSession.shared.dataTask(with: url) { (data, response, error) in
+        if let error = error {
+            completionHandler(nil, error)
+        }
+        if let data = data, let httpResponse = response as? HTTPURLResponse,
+           httpResponse.statusCode == 200 {
+            DispatchQueue.main.async {
+                completionHandler(UIImage(data: data), nil)
+            }
+        } else {
+            completionHandler(nil, DogsError.invalidServerResponse)
+        }
+    }
+    task.resume()
+}
+
+// async/awaitベースの関数
+func fetchPhoto(url: URL) async throws -> UIImage {
+    let (data, response) = try await URLSession.shared.data(from: url)
+
+    guard let httpResponse = response as? HTTPURLResponse,
+          httpResponse.statusCode == 200 else {
+        throw DogsError.invalidServerResponse
+    }
+
+    guard let image = UIImage(data: data) else {
+        throw DogsError.unsupportedImage
+    }
+
+    return image
 }
