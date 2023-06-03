@@ -51,5 +51,6 @@ let significantQuakes = quakes.filter { quake in
 }
 
 for await quake in significantQuakes {
-    
+    // TODO: 何か実装する
+    print(quake.magnitude)
 }
