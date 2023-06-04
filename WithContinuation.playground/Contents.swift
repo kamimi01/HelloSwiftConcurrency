@@ -17,3 +17,7 @@ func asyncWithConcurrency() async throws -> String {
 func asyncWithCompletionHandler(completionHandler: @escaping (Result<String, Error>) -> ()) {
     completionHandler(.success("success"))
 }
+
+// ⚠️注意
+// continuation は必ず"1回だけ"、"全ての分岐で呼ばれる"必要がある
+// そうでなければクラッシュしたり、おかしな挙動をしたりする
